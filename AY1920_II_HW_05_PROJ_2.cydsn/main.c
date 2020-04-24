@@ -28,6 +28,7 @@
 *   \brief Address of the Status register
 */
 #define LIS3DH_STATUS_REG 0x27
+#define LIS3DH_STATUS_REG_NEW_VALUES 0x07
 
 /**
 *   \brief Address of the Control register 1
@@ -293,6 +294,8 @@ int main(void)
     uint8_t footer = 0xC0;
     uint8_t OutArray[8]; // Send an array that contains 2 byte per axis plus header and tail
     uint8_t AccelerometerData[2]; // Array that contains temporal data of each axis
+    uint8_t Check_data; // Data read by the Status Register
+    CYBIT flag_start_reading=0; // Flag used to start reading or not data from axis' registers
     
     OutArray[0] = header;
     OutArray[7] = footer;
@@ -300,6 +303,21 @@ int main(void)
     for(;;)
     {
         CyDelay(100);
+        
+        // Check if new data is available by check the status register
+        error = I2C_Peripheral_ReadRegister(LIS3DH_DEVICE_ADDRESS,
+                                            LIS3DH_STATUS_REG,
+                                            &Check_data);
+        if(error == NO_ERROR)
+        {
+            //Check bit a bit with data read from the Status Register
+            if ((Check_data&LIS3DH_STATUS_REG_NEW_VALUES)==LIS3DH_STATUS_REG_NEW_VALUES){
+                flag_start_reading =1;
+            }
+            
+        }
+        
+        if (flag_start_reading){
         // Read X axis
         error = I2C_Peripheral_ReadRegisterMulti(LIS3DH_DEVICE_ADDRESS,
                                             LIS3DH_OUT_X_L,
@@ -338,6 +356,8 @@ int main(void)
         
         // Send all the measurements throught UART communication
         UART_Debug_PutArray(OutArray, 8);
+        }
+        flag_start_reading=0; // Reset flag
         
     }
 }
