@@ -75,8 +75,8 @@
         if (error == I2C_Master_MSTR_NO_ERROR)
         {
             // Write address of register to be read
-            register_address |= 0x80;
-            error = I2C_Master_MasterWriteByte(register_address|(0x80));
+            
+            error = I2C_Master_MasterWriteByte(register_address|(0x80)); // Set to 1 the MSB in order to auto increment register
             if (error == I2C_Master_MSTR_NO_ERROR)
             {
                 // Send restart condition
@@ -131,12 +131,12 @@
         if (error == I2C_Master_MSTR_NO_ERROR)
         {
             // Write register address
-            register_address |= 0x80;
+            register_address |= 0x80; // Set to 1 the MSB in order to auto increment register
             error = I2C_Master_MasterWriteByte(register_address);
             if (error == I2C_Master_MSTR_NO_ERROR)
             {
                 // Write byte of interest
-                register_count=register_count-1;
+                register_count=register_count-1; // Start counting from 0
                 while(register_address>0){
                 error = I2C_Master_MasterWriteByte(data[register_count]);
                 register_count--;
