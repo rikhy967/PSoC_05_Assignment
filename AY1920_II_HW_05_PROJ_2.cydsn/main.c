@@ -5,7 +5,7 @@
 * to understand the I2C protocol and communicate with a
 * a I2C Slave device (LIS3DH Accelerometer).
 *
-* \author Gabriele Belotti
+* \author Riccardo Levi
 * \date , 2020
 */
 
@@ -83,6 +83,13 @@
 #define LIS3DH_OUT_X_H 0x29
 #define LIS3DH_OUT_Y_H 0x2B
 #define LIS3DH_OUT_Z_H 0x2D
+
+/*
+*  Sensitivity Level
+*/
+
+#define LIS3DH_SENS_2G 4 //Sensitivity for ± 2g FSR Normal Mode (mg/digit)
+#define LIS3DH_RES_NORMAL 10 //Number of bits in Normal Mode Resolution
 
 
 
@@ -290,19 +297,25 @@ int main(void)
     }
     
     int16_t OutTemp;
+ 
     uint8_t header = 0xA0;
     uint8_t footer = 0xC0;
     uint8_t OutArray[8]; // Send an array that contains 2 byte per axis plus header and tail
     uint8_t AccelerometerData[2]; // Array that contains temporal data of each axis
     uint8_t Check_data; // Data read by the Status Register
     CYBIT flag_start_reading=0; // Flag used to start reading or not data from axis' registers
+ 
+    
+    
     
     OutArray[0] = header;
     OutArray[7] = footer;
     
+
+    
     for(;;)
     {
-        CyDelay(100);
+        //CyDelay(100);
         
         // Check if new data is available by check the status register
         error = I2C_Peripheral_ReadRegister(LIS3DH_DEVICE_ADDRESS,
@@ -326,8 +339,12 @@ int main(void)
         if(error == NO_ERROR)
         {
             OutTemp = (int16)((AccelerometerData[1] | (AccelerometerData[0]<<8)))>>6;
+            OutTemp = OutTemp*LIS3DH_SENS_2G;
             OutArray[1] = (uint8_t)(OutTemp & 0xFF);
             OutArray[2] = (uint8_t)(OutTemp >> 8);
+
+            
+            
             
         }
         // Read Y axis
@@ -338,8 +355,10 @@ int main(void)
         if(error == NO_ERROR)
         {
             OutTemp = (int16)((AccelerometerData[1] | (AccelerometerData[0]<<8)))>>6;
+            OutTemp = OutTemp*LIS3DH_SENS_2G;
             OutArray[3] = (uint8_t)(OutTemp & 0xFF);
             OutArray[4] = (uint8_t)(OutTemp >> 8);
+
             
         }
         // Read Z axis
@@ -350,12 +369,15 @@ int main(void)
         if(error == NO_ERROR)
         {
             OutTemp = (int16)((AccelerometerData[1] | (AccelerometerData[0]<<8)))>>6;
+            OutTemp = OutTemp*LIS3DH_SENS_2G;
             OutArray[5] = (uint8_t)(OutTemp & 0xFF);
-            OutArray[6] = (uint8_t)(OutTemp >> 8);   
+            OutArray[6] = (uint8_t)(OutTemp >> 8);
+
         }
         
         // Send all the measurements throught UART communication
         UART_Debug_PutArray(OutArray, 8);
+
         }
         flag_start_reading=0; // Reset flag
         
