@@ -90,6 +90,7 @@
 */
 
 #define LIS3DH_SENS_2G 4 //Sensitivity for ± 2g FSR Normal Mode (mg/digit)
+#define LIS3DH_SENS_4G 2 //Sensitivity for ± 2g FSR Normal Mode (mg/digit)
 #define LIS3DH_RES_NORMAL 10 //Number of bits in Normal Mode Resolution
 
 
@@ -341,7 +342,8 @@ int main(void)
         if(error == NO_ERROR)
         {
             OutTemp = (int16)((AccelerometerData[1] | (AccelerometerData[0]<<8)))>>4;
-            OutTemp = OutTemp*LIS3DH_SENS_2G;
+            OutTemp = OutTemp*LIS3DH_SENS_4G;
+            OutTemp = OutTemp*9.81;
             OutArray[1] = (uint8_t)(OutTemp & 0xFF);
             OutArray[2] = (uint8_t)(OutTemp >> 8);
 
@@ -357,7 +359,8 @@ int main(void)
         if(error == NO_ERROR)
         {
             OutTemp = (int16)((AccelerometerData[1] | (AccelerometerData[0]<<8)))>>4;
-            OutTemp = OutTemp*LIS3DH_SENS_2G;
+            OutTemp = OutTemp*LIS3DH_SENS_4G;
+            OutTemp = OutTemp*9.81;
             OutArray[3] = (uint8_t)(OutTemp & 0xFF);
             OutArray[4] = (uint8_t)(OutTemp >> 8);
 
@@ -371,7 +374,8 @@ int main(void)
         if(error == NO_ERROR)
         {
             OutTemp = (int16)((AccelerometerData[1] | (AccelerometerData[0]<<8)))>>4;
-            OutTemp = OutTemp*LIS3DH_SENS_2G;
+            OutTemp = OutTemp*LIS3DH_SENS_4G;
+            OutTemp = OutTemp*9.81;
             OutArray[5] = (uint8_t)(OutTemp & 0xFF);
             OutArray[6] = (uint8_t)(OutTemp >> 8);
 
