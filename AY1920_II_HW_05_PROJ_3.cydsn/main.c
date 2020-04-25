@@ -11,6 +11,7 @@
 
 // Include required header files
 #include "I2C_Interface.h"
+#include "InterruptRoutines.h"
 #include "project.h"
 #include "stdio.h"
 
@@ -43,7 +44,7 @@
 /**
 *   \brief Hex value to set normal mode 100Hz to the accelerator
 */
-#define LIS3DH_100Hz_CTRL_REG1 0x57
+#define LIS3DH_100Hz_NORMAL_MODE_CTRL_REG1 0x57
 
 /**
 *   \brief  Address of the Temperature Sensor Configuration register
@@ -59,8 +60,7 @@
 #define LIS3DH_CTRL_REG4 0x23
 
 
-#define LIS3DH_CTRL_REG4_NORMAL_2G_ACTIVE 0x80 // ± 2g FSR
-#define LIS3DH_CTRL_REG4_HIGH_4G_ACTIVE 0x98 // ± 2g FSR
+#define LIS3DH_CTRL_REG4_BDU_ACTIVE 0x80 // ± 2g FSR
 
 /**
 *   \brief Address of the ADC output LSB register
@@ -90,7 +90,6 @@
 */
 
 #define LIS3DH_SENS_2G 4 //Sensitivity for ± 2g FSR Normal Mode (mg/digit)
-#define LIS3DH_SENS_4G 1 //Sensitivity for ± 4g FSR High-Resolution Mode (mg/digit)
 #define LIS3DH_RES_NORMAL 10 //Number of bits in Normal Mode Resolution
 
 
@@ -102,6 +101,8 @@ int main(void)
     /* Place your initialization/startup code here (e.g. MyInst_Start()) */
     I2C_Peripheral_Start();
     UART_Debug_Start();
+    Timer_Start();
+    isr_Timer_StartEx(Custom_Timer_ISR);
     
     CyDelay(5); //"The boot procedure is complete about 5 milliseconds after device power-up."
     
@@ -181,9 +182,9 @@ int main(void)
         
     UART_Debug_PutString("\r\nWriting new values..\r\n");
     
-    if (ctrl_reg1 != LIS3DH_100Hz_CTRL_REG1)
+    if (ctrl_reg1 != LIS3DH_100Hz_NORMAL_MODE_CTRL_REG1)
     {
-        ctrl_reg1 = LIS3DH_100Hz_CTRL_REG1;
+        ctrl_reg1 = LIS3DH_100Hz_NORMAL_MODE_CTRL_REG1;
     
         error = I2C_Peripheral_WriteRegister(LIS3DH_DEVICE_ADDRESS,
                                              LIS3DH_CTRL_REG1,
@@ -277,7 +278,7 @@ int main(void)
     }
     
     
-    ctrl_reg4 = LIS3DH_CTRL_REG4_HIGH_4G_ACTIVE; // must be changed to the appropriate value
+    ctrl_reg4 = LIS3DH_CTRL_REG4_BDU_ACTIVE; // must be changed to the appropriate value
     
     error = I2C_Peripheral_WriteRegister(LIS3DH_DEVICE_ADDRESS,
                                          LIS3DH_CTRL_REG4,
@@ -312,12 +313,11 @@ int main(void)
     
     OutArray[0] = header;
     OutArray[7] = footer;
-    
+    Start_reading_flag=0;
 
     
     for(;;)
     {
-        //CyDelay(100);
         
         // Check if new data is available by check the status register
         error = I2C_Peripheral_ReadRegister(LIS3DH_DEVICE_ADDRESS,
@@ -332,7 +332,7 @@ int main(void)
             
         }
         
-        if (flag_start_reading){
+        if (flag_start_reading & Start_reading_flag){
         // Read X axis
         error = I2C_Peripheral_ReadRegisterMulti(LIS3DH_DEVICE_ADDRESS,
                                             LIS3DH_OUT_X_L,
@@ -340,8 +340,8 @@ int main(void)
                                             AccelerometerData);
         if(error == NO_ERROR)
         {
-            OutTemp = (int16)((AccelerometerData[1] | (AccelerometerData[0]<<8)))>>4;
-            OutTemp = OutTemp*LIS3DH_SENS_4G;
+            OutTemp = (int16)((AccelerometerData[1] | (AccelerometerData[0]<<8)))>>6;
+            OutTemp = OutTemp*LIS3DH_SENS_2G;
             OutArray[1] = (uint8_t)(OutTemp & 0xFF);
             OutArray[2] = (uint8_t)(OutTemp >> 8);
 
@@ -356,8 +356,8 @@ int main(void)
                                             AccelerometerData);
         if(error == NO_ERROR)
         {
-            OutTemp = (int16)((AccelerometerData[1] | (AccelerometerData[0]<<8)))>>4;
-            OutTemp = OutTemp*LIS3DH_SENS_4G;
+            OutTemp = (int16)((AccelerometerData[1] | (AccelerometerData[0]<<8)))>>6;
+            OutTemp = OutTemp*LIS3DH_SENS_2G;
             OutArray[3] = (uint8_t)(OutTemp & 0xFF);
             OutArray[4] = (uint8_t)(OutTemp >> 8);
 
@@ -370,8 +370,8 @@ int main(void)
                                             AccelerometerData);
         if(error == NO_ERROR)
         {
-            OutTemp = (int16)((AccelerometerData[1] | (AccelerometerData[0]<<8)))>>4;
-            OutTemp = OutTemp*LIS3DH_SENS_4G;
+            OutTemp = (int16)((AccelerometerData[1] | (AccelerometerData[0]<<8)))>>6;
+            OutTemp = OutTemp*LIS3DH_SENS_2G;
             OutArray[5] = (uint8_t)(OutTemp & 0xFF);
             OutArray[6] = (uint8_t)(OutTemp >> 8);
 
@@ -381,7 +381,8 @@ int main(void)
         UART_Debug_PutArray(OutArray, 8);
 
         }
-        flag_start_reading=0; // Reset flag
+        flag_start_reading=0; // Reset flag checking LIS3DH Status Register
+        Start_reading_flag=0; // Reset flag checking Timer Status Register
         
     }
 }
