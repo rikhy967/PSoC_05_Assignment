@@ -11,6 +11,7 @@
 
 // Include required header files
 #include "I2C_Interface.h"
+#include "InterruptRoutines.h"
 #include "project.h"
 #include "stdio.h"
 
@@ -100,6 +101,8 @@ int main(void)
     /* Place your initialization/startup code here (e.g. MyInst_Start()) */
     I2C_Peripheral_Start();
     UART_Debug_Start();
+    Timer_Start();
+    isr_Timer_StartEx(Custom_Timer_ISR);
     
     CyDelay(5); //"The boot procedure is complete about 5 milliseconds after device power-up."
     
@@ -310,12 +313,11 @@ int main(void)
     
     OutArray[0] = header;
     OutArray[7] = footer;
-    
+    Start_reading_flag=0;
 
     
     for(;;)
     {
-        //CyDelay(100);
         
         // Check if new data is available by check the status register
         error = I2C_Peripheral_ReadRegister(LIS3DH_DEVICE_ADDRESS,
@@ -330,7 +332,7 @@ int main(void)
             
         }
         
-        if (flag_start_reading){
+        if (flag_start_reading & Start_reading_flag){
         // Read X axis
         error = I2C_Peripheral_ReadRegisterMulti(LIS3DH_DEVICE_ADDRESS,
                                             LIS3DH_OUT_X_L,
@@ -379,7 +381,8 @@ int main(void)
         UART_Debug_PutArray(OutArray, 8);
 
         }
-        flag_start_reading=0; // Reset flag
+        flag_start_reading=0; // Reset flag checking LIS3DH Status Register
+        Start_reading_flag=0; // Reset flag checking Timer Status Register
         
     }
 }
