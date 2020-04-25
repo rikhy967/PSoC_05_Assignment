@@ -334,7 +334,7 @@ int main(void)
             
         }
         
-        if (flag_start_reading){
+        if (flag_start_reading & Start_reading_flag){
         // Read X axis
         error = I2C_Peripheral_ReadRegisterMulti(LIS3DH_DEVICE_ADDRESS,
                                             LIS3DH_OUT_X_L,

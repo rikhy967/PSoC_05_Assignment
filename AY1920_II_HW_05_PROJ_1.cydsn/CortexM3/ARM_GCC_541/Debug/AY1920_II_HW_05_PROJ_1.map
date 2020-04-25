@@ -1192,22 +1192,22 @@ END GROUP
  .debug_str     0x00001d76       0xac .\CortexM3\ARM_GCC_541\Debug\AY1920_II_HW_05_PROJ_1.a(CySpc.o)
                                 0x36c (size before relaxing)
 
-.debug_loc      0x00000000     0x27c4
+.debug_loc      0x00000000     0x27b4
  *(.debug_loc)
  .debug_loc     0x00000000      0x129 .\CortexM3\ARM_GCC_541\Debug\main.o
- .debug_loc     0x00000129      0x2fa .\CortexM3\ARM_GCC_541\Debug\I2C_Interface.o
- .debug_loc     0x00000423      0x289 .\CortexM3\ARM_GCC_541\Debug\cyfitter_cfg.o
- .debug_loc     0x000006ac      0x144 .\CortexM3\ARM_GCC_541\Debug\Cm3Start.o
- .debug_loc     0x000007f0      0x258 .\CortexM3\ARM_GCC_541\Debug\AY1920_II_HW_05_PROJ_1.a(UART_Debug.o)
- .debug_loc     0x00000a48       0x39 .\CortexM3\ARM_GCC_541\Debug\AY1920_II_HW_05_PROJ_1.a(I2C_Master.o)
- .debug_loc     0x00000a81       0x29 .\CortexM3\ARM_GCC_541\Debug\AY1920_II_HW_05_PROJ_1.a(I2C_Master_INT.o)
- .debug_loc     0x00000aaa       0x13 .\CortexM3\ARM_GCC_541\Debug\AY1920_II_HW_05_PROJ_1.a(I2C_Master_PM.o)
- .debug_loc     0x00000abd      0x52f .\CortexM3\ARM_GCC_541\Debug\AY1920_II_HW_05_PROJ_1.a(I2C_Master_MASTER.o)
- .debug_loc     0x00000fec      0x12c .\CortexM3\ARM_GCC_541\Debug\AY1920_II_HW_05_PROJ_1.a(UART_Debug_IntClock.o)
- .debug_loc     0x00001118      0xa11 .\CortexM3\ARM_GCC_541\Debug\AY1920_II_HW_05_PROJ_1.a(CyLib.o)
- .debug_loc     0x00001b29      0x1e4 .\CortexM3\ARM_GCC_541\Debug\AY1920_II_HW_05_PROJ_1.a(cyPm.o)
- .debug_loc     0x00001d0d      0x3b2 .\CortexM3\ARM_GCC_541\Debug\AY1920_II_HW_05_PROJ_1.a(CyFlash.o)
- .debug_loc     0x000020bf      0x705 .\CortexM3\ARM_GCC_541\Debug\AY1920_II_HW_05_PROJ_1.a(CySpc.o)
+ .debug_loc     0x00000129      0x2ea .\CortexM3\ARM_GCC_541\Debug\I2C_Interface.o
+ .debug_loc     0x00000413      0x289 .\CortexM3\ARM_GCC_541\Debug\cyfitter_cfg.o
+ .debug_loc     0x0000069c      0x144 .\CortexM3\ARM_GCC_541\Debug\Cm3Start.o
+ .debug_loc     0x000007e0      0x258 .\CortexM3\ARM_GCC_541\Debug\AY1920_II_HW_05_PROJ_1.a(UART_Debug.o)
+ .debug_loc     0x00000a38       0x39 .\CortexM3\ARM_GCC_541\Debug\AY1920_II_HW_05_PROJ_1.a(I2C_Master.o)
+ .debug_loc     0x00000a71       0x29 .\CortexM3\ARM_GCC_541\Debug\AY1920_II_HW_05_PROJ_1.a(I2C_Master_INT.o)
+ .debug_loc     0x00000a9a       0x13 .\CortexM3\ARM_GCC_541\Debug\AY1920_II_HW_05_PROJ_1.a(I2C_Master_PM.o)
+ .debug_loc     0x00000aad      0x52f .\CortexM3\ARM_GCC_541\Debug\AY1920_II_HW_05_PROJ_1.a(I2C_Master_MASTER.o)
+ .debug_loc     0x00000fdc      0x12c .\CortexM3\ARM_GCC_541\Debug\AY1920_II_HW_05_PROJ_1.a(UART_Debug_IntClock.o)
+ .debug_loc     0x00001108      0xa11 .\CortexM3\ARM_GCC_541\Debug\AY1920_II_HW_05_PROJ_1.a(CyLib.o)
+ .debug_loc     0x00001b19      0x1e4 .\CortexM3\ARM_GCC_541\Debug\AY1920_II_HW_05_PROJ_1.a(cyPm.o)
+ .debug_loc     0x00001cfd      0x3b2 .\CortexM3\ARM_GCC_541\Debug\AY1920_II_HW_05_PROJ_1.a(CyFlash.o)
+ .debug_loc     0x000020af      0x705 .\CortexM3\ARM_GCC_541\Debug\AY1920_II_HW_05_PROJ_1.a(CySpc.o)
 
 .debug_macinfo
  *(.debug_macinfo)

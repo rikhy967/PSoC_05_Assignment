@@ -301,10 +301,14 @@ int main(void)
     }
     
     int16_t OutTemp;
+    float32 OutTempHR_float;
+    int32 OutTempHR_int;
+    
  
     uint8_t header = 0xA0;
     uint8_t footer = 0xC0;
     uint8_t OutArray[8]; // Send an array that contains 2 byte per axis plus header and tail
+    uint8_t OutArrayHR[14]; // Send an array that contains 2 byte per axis plus header and tail
     uint8_t AccelerometerData[2]; // Array that contains temporal data of each axis
     uint8_t Check_data; // Data read by the Status Register
     CYBIT flag_start_reading=0; // Flag used to start reading or not data from axis' registers
@@ -314,10 +318,12 @@ int main(void)
     
     OutArray[0] = header;
     OutArray[7] = footer;
+    OutArrayHR[0] = header;
+    OutArrayHR[13] = footer; 
     Start_reading_flag=0;
 
     
-    for(;;)
+    /*for(;;)
     {
         
         // Check if new data is available by check the status register
@@ -383,6 +389,88 @@ int main(void)
         
         // Send all the measurements throught UART communication
         UART_Debug_PutArray(OutArray, 8);
+
+        }
+        flag_start_reading=0; // Reset flag checking LIS3DH Status Register
+        Start_reading_flag=0; // Reset flag checking Timer Status Register
+        
+    }
+    */
+    for(;;)
+    {
+        
+        // Check if new data is available by check the status register
+        error = I2C_Peripheral_ReadRegister(LIS3DH_DEVICE_ADDRESS,
+                                            LIS3DH_STATUS_REG,
+                                            &Check_data);
+        if(error == NO_ERROR)
+        {
+            //Check bit a bit with data read from the Status Register
+            if ((Check_data&LIS3DH_STATUS_REG_NEW_VALUES)==LIS3DH_STATUS_REG_NEW_VALUES){
+                flag_start_reading =1;
+            }
+            
+        }
+        
+        if (flag_start_reading & Start_reading_flag){
+        // Read X axis
+        error = I2C_Peripheral_ReadRegisterMulti(LIS3DH_DEVICE_ADDRESS,
+                                            LIS3DH_OUT_X_L,
+                                            2,
+                                            AccelerometerData);
+        if(error == NO_ERROR)
+        {
+            OutTemp   = (int16)((AccelerometerData[1] | (AccelerometerData[0]<<8)))>>4;
+            OutTemp = OutTemp*LIS3DH_SENS_4G;
+            OutTempHR_float = OutTemp*9.80665;
+            OutTempHR_int = (int32) OutTempHR_float;
+            OutArrayHR[1] = (uint8_t)(OutTemp & 0xFF);
+            OutArrayHR[2] = (uint8_t)((OutTemp >> 8)&0xFF);
+            OutArrayHR[3] = (uint8_t)((OutTemp >> 16)&0xFF);
+            OutArrayHR[4] = (uint8_t)(OutTemp >> 24);
+
+            
+            
+            
+        }
+        // Read Y axis
+        error = I2C_Peripheral_ReadRegisterMulti(LIS3DH_DEVICE_ADDRESS,
+                                            LIS3DH_OUT_Y_L,
+                                            2,
+                                            AccelerometerData);
+        if(error == NO_ERROR)
+        {
+            OutTemp = (int16)((AccelerometerData[1] | (AccelerometerData[0]<<8)))>>4;
+            OutTemp = OutTemp*LIS3DH_SENS_4G;
+            OutTempHR_float = (OutTemp)*9.80665;
+            OutTempHR_int = (int32) OutTempHR_float;
+            OutArrayHR[5] = (uint8_t)(OutTemp & 0xFF);
+            OutArrayHR[6] = (uint8_t)((OutTemp >> 8)&0xFF);
+            OutArrayHR[7] = (uint8_t)((OutTemp >> 16)&0xFF);
+            OutArrayHR[8] = (uint8_t)(OutTemp >> 24);
+
+            
+        }
+        // Read Z axis
+        error = I2C_Peripheral_ReadRegisterMulti(LIS3DH_DEVICE_ADDRESS,
+                                            LIS3DH_OUT_Z_L,
+                                            2,
+                                            AccelerometerData);
+        if(error == NO_ERROR)
+        {
+            OutTemp = (int16)((AccelerometerData[1] | (AccelerometerData[0]<<8)))>>4;
+            OutTemp = OutTemp*LIS3DH_SENS_4G;
+            OutTempHR_float = OutTemp*9.80665;
+            OutTempHR_int = (int32) OutTempHR_float;
+            OutArrayHR[9] = (uint8_t)(OutTemp & 0xFF);
+            OutArrayHR[10] = (uint8_t)((OutTemp >> 8)&0xFF);
+            OutArrayHR[11] = (uint8_t)((OutTemp >> 16)&0xFF);
+            OutArrayHR[12] = (uint8_t)(OutTemp >> 24);
+
+        }
+        
+        // Send all the measurements throught UART communication
+        UART_Debug_PutArray(OutArrayHR, 14);
 
         }
         flag_start_reading=0; // Reset flag checking LIS3DH Status Register
