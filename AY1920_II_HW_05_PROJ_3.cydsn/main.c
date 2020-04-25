@@ -42,10 +42,9 @@
 #define LIS3DH_50Hz_NORMAL_MODE_CTRL_REG1 0x47
 
 /**
-*   \brief Hex value to set normal mode 100Hz to the accelerator
+*   \brief Hex value to set normal mode or high resolution mode  100Hz to the accelerator
 */
-#define LIS3DH_100Hz_NORMAL_MODE_CTRL_REG1 0x57
-
+#define LIS3DH_100Hz_CTRL_REG1 0x57
 /**
 *   \brief  Address of the Temperature Sensor Configuration register
 */
@@ -60,7 +59,8 @@
 #define LIS3DH_CTRL_REG4 0x23
 
 
-#define LIS3DH_CTRL_REG4_BDU_ACTIVE 0x80 // ± 2g FSR
+#define LIS3DH_CTRL_REG4_2G_NORMAL 0x00 // ± 2g FSR Normal Mode
+#define LIS3DH_CTRL_REG4_4G_HIGH 0x18 // ± 4g FSR High Resolution Mode
 
 /**
 *   \brief Address of the ADC output LSB register
@@ -90,6 +90,7 @@
 */
 
 #define LIS3DH_SENS_2G 4 //Sensitivity for ± 2g FSR Normal Mode (mg/digit)
+#define LIS3DH_SENS_4G 2 //Sensitivity for ± 2g FSR Normal Mode (mg/digit)
 #define LIS3DH_RES_NORMAL 10 //Number of bits in Normal Mode Resolution
 
 
@@ -182,9 +183,9 @@ int main(void)
         
     UART_Debug_PutString("\r\nWriting new values..\r\n");
     
-    if (ctrl_reg1 != LIS3DH_100Hz_NORMAL_MODE_CTRL_REG1)
+    if (ctrl_reg1 != LIS3DH_100Hz_CTRL_REG1)
     {
-        ctrl_reg1 = LIS3DH_100Hz_NORMAL_MODE_CTRL_REG1;
+        ctrl_reg1 = LIS3DH_100Hz_CTRL_REG1;
     
         error = I2C_Peripheral_WriteRegister(LIS3DH_DEVICE_ADDRESS,
                                              LIS3DH_CTRL_REG1,
@@ -278,7 +279,7 @@ int main(void)
     }
     
     
-    ctrl_reg4 = LIS3DH_CTRL_REG4_BDU_ACTIVE; // must be changed to the appropriate value
+    ctrl_reg4 = LIS3DH_CTRL_REG4_4G_HIGH; // must be changed to the appropriate value
     
     error = I2C_Peripheral_WriteRegister(LIS3DH_DEVICE_ADDRESS,
                                          LIS3DH_CTRL_REG4,
@@ -340,8 +341,9 @@ int main(void)
                                             AccelerometerData);
         if(error == NO_ERROR)
         {
-            OutTemp = (int16)((AccelerometerData[1] | (AccelerometerData[0]<<8)))>>6;
-            OutTemp = OutTemp*LIS3DH_SENS_2G;
+            OutTemp = (int16)((AccelerometerData[1] | (AccelerometerData[0]<<8)))>>4;
+            OutTemp = OutTemp*LIS3DH_SENS_4G;
+            OutTemp = OutTemp*9.81;
             OutArray[1] = (uint8_t)(OutTemp & 0xFF);
             OutArray[2] = (uint8_t)(OutTemp >> 8);
 
@@ -356,8 +358,9 @@ int main(void)
                                             AccelerometerData);
         if(error == NO_ERROR)
         {
-            OutTemp = (int16)((AccelerometerData[1] | (AccelerometerData[0]<<8)))>>6;
-            OutTemp = OutTemp*LIS3DH_SENS_2G;
+            OutTemp = (int16)((AccelerometerData[1] | (AccelerometerData[0]<<8)))>>4;
+            OutTemp = OutTemp*LIS3DH_SENS_4G;
+            OutTemp = OutTemp*9.81;
             OutArray[3] = (uint8_t)(OutTemp & 0xFF);
             OutArray[4] = (uint8_t)(OutTemp >> 8);
 
@@ -370,8 +373,9 @@ int main(void)
                                             AccelerometerData);
         if(error == NO_ERROR)
         {
-            OutTemp = (int16)((AccelerometerData[1] | (AccelerometerData[0]<<8)))>>6;
-            OutTemp = OutTemp*LIS3DH_SENS_2G;
+            OutTemp = (int16)((AccelerometerData[1] | (AccelerometerData[0]<<8)))>>4;
+            OutTemp = OutTemp*LIS3DH_SENS_4G;
+            OutTemp = OutTemp*9.81;
             OutArray[5] = (uint8_t)(OutTemp & 0xFF);
             OutArray[6] = (uint8_t)(OutTemp >> 8);
 

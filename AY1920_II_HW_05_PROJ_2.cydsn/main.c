@@ -279,7 +279,7 @@ int main(void)
     }
     
     
-    ctrl_reg4 = LIS3DH_CTRL_REG4_4G_HIGH; // must be changed to the appropriate value
+    ctrl_reg4 = LIS3DH_CTRL_REG4_2G_NORMAL; // must be changed to the appropriate value
     
     error = I2C_Peripheral_WriteRegister(LIS3DH_DEVICE_ADDRESS,
                                          LIS3DH_CTRL_REG4,
@@ -301,19 +301,20 @@ int main(void)
     }
     
     int16_t OutTemp;
+
  
     uint8_t header = 0xA0;
     uint8_t footer = 0xC0;
     uint8_t OutArray[8]; // Send an array that contains 2 byte per axis plus header and tail
+    
     uint8_t AccelerometerData[2]; // Array that contains temporal data of each axis
     uint8_t Check_data; // Data read by the Status Register
     CYBIT flag_start_reading=0; // Flag used to start reading or not data from axis' registers
  
     
-    
-    
     OutArray[0] = header;
     OutArray[7] = footer;
+
     Start_reading_flag=0;
 
     
@@ -333,7 +334,7 @@ int main(void)
             
         }
         
-        if (flag_start_reading & Start_reading_flag){
+        if (flag_start_reading){
         // Read X axis
         error = I2C_Peripheral_ReadRegisterMulti(LIS3DH_DEVICE_ADDRESS,
                                             LIS3DH_OUT_X_L,
@@ -341,14 +342,13 @@ int main(void)
                                             AccelerometerData);
         if(error == NO_ERROR)
         {
-            OutTemp = (int16)((AccelerometerData[1] | (AccelerometerData[0]<<8)))>>4;
-            OutTemp = OutTemp*LIS3DH_SENS_4G;
-            OutTemp = OutTemp*9.81;
+            OutTemp = (int16)((AccelerometerData[1] | (AccelerometerData[0]<<8)))>>6;
+            OutTemp = OutTemp*LIS3DH_SENS_2G;
+
             OutArray[1] = (uint8_t)(OutTemp & 0xFF);
             OutArray[2] = (uint8_t)(OutTemp >> 8);
+            
 
-            
-            
             
         }
         // Read Y axis
@@ -358,11 +358,12 @@ int main(void)
                                             AccelerometerData);
         if(error == NO_ERROR)
         {
-            OutTemp = (int16)((AccelerometerData[1] | (AccelerometerData[0]<<8)))>>4;
-            OutTemp = OutTemp*LIS3DH_SENS_4G;
-            OutTemp = OutTemp*9.81;
+            OutTemp = (int16)((AccelerometerData[1] | (AccelerometerData[0]<<8)))>>6;
+            OutTemp = OutTemp*LIS3DH_SENS_2G;
+
             OutArray[3] = (uint8_t)(OutTemp & 0xFF);
             OutArray[4] = (uint8_t)(OutTemp >> 8);
+
 
             
         }
@@ -373,16 +374,18 @@ int main(void)
                                             AccelerometerData);
         if(error == NO_ERROR)
         {
-            OutTemp = (int16)((AccelerometerData[1] | (AccelerometerData[0]<<8)))>>4;
-            OutTemp = OutTemp*LIS3DH_SENS_4G;
-            OutTemp = OutTemp*9.81;
+            OutTemp = (int16)((AccelerometerData[1] | (AccelerometerData[0]<<8)))>>6;
+            OutTemp = OutTemp*LIS3DH_SENS_2G;
+
             OutArray[5] = (uint8_t)(OutTemp & 0xFF);
             OutArray[6] = (uint8_t)(OutTemp >> 8);
+
 
         }
         
         // Send all the measurements throught UART communication
         UART_Debug_PutArray(OutArray, 8);
+    
 
         }
         flag_start_reading=0; // Reset flag checking LIS3DH Status Register
