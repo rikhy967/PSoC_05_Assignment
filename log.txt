@@ -1,0 +1,89 @@
+commit 4ded61568ca5cfadf8b110f907f84bdbf9a28a5a
+Author: RiccardoL <riccardo.levi@mail.polimi.it>
+Date:   Sun Apr 26 17:31:40 2020 +0200
+
+    Add Bridge Control Panel files for Project 3
+
+commit 3ca36006c1f9f93ceb2304dc98f7acda7c8150f6
+Author: RiccardoL <riccardo.levi@mail.polimi.it>
+Date:   Sun Apr 26 17:26:57 2020 +0200
+
+    Add Project 2.3 with comments in every steps of the code
+
+commit 7f78ff35c3d3cbf294f80bdc15ae87ff70f9e8b6
+Author: RiccardoL <riccardo.levi@mail.polimi.it>
+Date:   Sat Apr 25 12:31:15 2020 +0200
+
+    Add conversion to m/s^2 for Project 2.3
+
+commit 32ac031163ff22dfc4acfb84f17cfdb63f3cdad6
+Author: RiccardoL <riccardo.levi@mail.polimi.it>
+Date:   Sat Apr 25 11:47:23 2020 +0200
+
+    Add some minor fixing adjustement to codes
+
+commit 6e147ba5ac93919182b33f49b332f6f88f0ab3b7
+Author: RiccardoL <riccardo.levi@mail.polimi.it>
+Date:   Sat Apr 25 10:37:15 2020 +0200
+
+    Add Project 2.3.3 in order to convert value in digit to m/s^2
+
+commit 1f0fcd0a49d74692cff38df49a1b136492d202d2
+Author: RiccardoL <riccardo.levi@mail.polimi.it>
+Date:   Sat Apr 25 10:31:43 2020 +0200
+
+    Add Project 2.3.1
+
+commit dd92e75849aeb3db33f7e9a672b6baa18d110c3c
+Author: RiccardoL <riccardo.levi@mail.polimi.it>
+Date:   Sat Apr 25 10:17:20 2020 +0200
+
+    Add at Project 2.2.5 an ISR on Timer counter in order to better control the sampling frequency
+
+commit d3c85a083d26e5c7d56a754e76a4b7aa5ba20b74
+Author: RiccardoL <riccardo.levi@mail.polimi.it>
+Date:   Fri Apr 24 19:15:42 2020 +0200
+
+    Add Project 2.2.5 with Bridge Control Panel
+
+commit fe1305bad78b74fc729a60217555b4dceb21b54a
+Author: RiccardoL <riccardo.levi@mail.polimi.it>
+Date:   Fri Apr 24 19:09:40 2020 +0200
+
+    Add Project 2.2.4
+
+commit 34c4d08581d1835d99ae4f99fc3b937c24d3cebc
+Author: RiccardoL <riccardo.levi@mail.polimi.it>
+Date:   Fri Apr 24 18:49:03 2020 +0200
+
+    Add Project 2.2.3
+
+commit 8b93b162fe9325705a6e720fc8a2fa2abf579a4f
+Author: RiccardoL <riccardo.levi@mail.polimi.it>
+Date:   Fri Apr 24 17:44:44 2020 +0200
+
+    Add Project 2.2.2
+
+commit 86e56bb51a0daf17d581f9a67b6e6f9f55b556e0
+Author: RiccardoL <riccardo.levi@mail.polimi.it>
+Date:   Fri Apr 24 17:23:50 2020 +0200
+
+    Add Project 2.2.1
+
+commit dfd7f35edad0eb739d22669a4e418906de63c724
+Author: RiccardoL <riccardo.levi@mail.polimi.it>
+Date:   Fri Apr 24 17:09:40 2020 +0200
+
+    Add comments to Prooject 2.1
+
+commit 5b042cbeabd1c1692010317eea947a45b0d9c5fc
+Author: RiccardoL <riccardo.levi@mail.polimi.it>
+Date:   Fri Apr 24 17:05:45 2020 +0200
+
+    Add project 2.1
+
+commit 2b88eb3884510f7b68a40c6aae60d356298f1fb2
+Author: RiccardoL <riccardo.levi@mail.polimi.it>
+Date:   Fri Apr 24 16:50:47 2020 +0200
+
+    Add I2C_Master_Advanced_Complete
