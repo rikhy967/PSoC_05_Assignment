@@ -16,7 +16,7 @@ CY_ISR(Custom_Timer_ISR){
     
 
     Timer_ReadStatusRegister(); // Read Timer Status Register in order to reset counter and trigger the ISR
-    Start_reading_flag=1;
+    Timer_ISR_start=1;
 
 }
 /* [] END OF FILE */

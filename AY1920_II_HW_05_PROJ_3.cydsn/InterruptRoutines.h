@@ -23,7 +23,7 @@
     CY_ISR_PROTO(Custom_Timer_ISR); 
 
 
-    volatile uint8 Start_reading_flag;
+    volatile uint8 Timer_ISR_start;
 
  
 

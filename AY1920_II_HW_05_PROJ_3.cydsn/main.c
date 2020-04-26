@@ -90,18 +90,22 @@
 */
 
 #define LIS3DH_SENS_2G 4 //Sensitivity for ± 2g FSR Normal Mode (mg/digit)
-#define LIS3DH_SENS_4G 2 //Sensitivity for ± 2g FSR Normal Mode (mg/digit)
-#define LIS3DH_RES_NORMAL 10 //Number of bits in Normal Mode Resolution
+#define LIS3DH_SENS_4G 2 //Sensitivity for ± 4g FSR High Resolution Mode (mg/digit)
 
+/*
+*  Conversion factor to m/s^2
+*/
 
+#define G_TO_ACC 9.80665 //   1g = 9.80665 m/s^2
 
 int main(void)
 {
     CyGlobalIntEnable; /* Enable global interrupts. */
 
-    /* Place your initialization/startup code here (e.g. MyInst_Start()) */
+    /* Initialization of I2C and UART communication*/
     I2C_Peripheral_Start();
     UART_Debug_Start();
+    /* Initialization of Timer and Timer ISR*/
     Timer_Start();
     isr_Timer_StartEx(Custom_Timer_ISR);
     
@@ -279,7 +283,9 @@ int main(void)
     }
     
     
-    ctrl_reg4 = LIS3DH_CTRL_REG4_4G_HIGH; // must be changed to the appropriate value
+    /* Set Control Register 4 in order to enable a FSR of ± 4g in High Resolution Mode */
+    
+    ctrl_reg4 = LIS3DH_CTRL_REG4_4G_HIGH; 
     
     error = I2C_Peripheral_WriteRegister(LIS3DH_DEVICE_ADDRESS,
                                          LIS3DH_CTRL_REG4,
@@ -300,101 +306,32 @@ int main(void)
         UART_Debug_PutString("Error occurred during I2C comm to read control register4\r\n");   
     }
     
-    int16_t OutTemp;
-    float32 OutTempHR_float;
-    int32 OutTempHR_int;
+    
+    
+    /*   READ DATA FROM ACCELEROMETER AND SEND TO BRIDGE CONTROL PANEL*/
+    
+    /*Variables Initialization*/
+    
+    int16_t OutTemp; // Variable that contains the data read from X/Y/Z Registers
+    float32 OutTempHR_float; // Float variable that cointains data converted in m/s^2
+    int32 OutTempHR_int; // Int 32 variable of OutTempHR_int
     
  
     uint8_t header = 0xA0;
     uint8_t footer = 0xC0;
-    uint8_t OutArray[8]; // Send an array that contains 2 byte per axis plus header and tail
     uint8_t OutArrayHR[14]; // Send an array that contains 2 byte per axis plus header and tail
     uint8_t AccelerometerData[2]; // Array that contains temporal data of each axis
     uint8_t Check_data; // Data read by the Status Register
-    CYBIT flag_start_reading=0; // Flag used to start reading or not data from axis' registers
+    CYBIT CTRL_Reg_start=0; // Flag used to control availability of data looking at Status Register
  
     
     
-    
-    OutArray[0] = header;
-    OutArray[7] = footer;
     OutArrayHR[0] = header;
     OutArrayHR[13] = footer; 
-    Start_reading_flag=0;
+    Timer_ISR_start=0;  // Flag set by the Timer ISR
 
-    
-    /*for(;;)
-    {
-        
-        // Check if new data is available by check the status register
-        error = I2C_Peripheral_ReadRegister(LIS3DH_DEVICE_ADDRESS,
-                                            LIS3DH_STATUS_REG,
-                                            &Check_data);
-        if(error == NO_ERROR)
-        {
-            //Check bit a bit with data read from the Status Register
-            if ((Check_data&LIS3DH_STATUS_REG_NEW_VALUES)==LIS3DH_STATUS_REG_NEW_VALUES){
-                flag_start_reading =1;
-            }
-            
-        }
-        
-        if (flag_start_reading & Start_reading_flag){
-        // Read X axis
-        error = I2C_Peripheral_ReadRegisterMulti(LIS3DH_DEVICE_ADDRESS,
-                                            LIS3DH_OUT_X_L,
-                                            2,
-                                            AccelerometerData);
-        if(error == NO_ERROR)
-        {
-            OutTemp = (int16)((AccelerometerData[1] | (AccelerometerData[0]<<8)))>>4;
-            OutTemp = OutTemp*LIS3DH_SENS_4G;
-            OutTemp = OutTemp*9.81;
-            OutArray[1] = (uint8_t)(OutTemp & 0xFF);
-            OutArray[2] = (uint8_t)(OutTemp >> 8);
-
-            
-            
-            
-        }
-        // Read Y axis
-        error = I2C_Peripheral_ReadRegisterMulti(LIS3DH_DEVICE_ADDRESS,
-                                            LIS3DH_OUT_Y_L,
-                                            2,
-                                            AccelerometerData);
-        if(error == NO_ERROR)
-        {
-            OutTemp = (int16)((AccelerometerData[1] | (AccelerometerData[0]<<8)))>>4;
-            OutTemp = OutTemp*LIS3DH_SENS_4G;
-            OutTemp = OutTemp*9.81;
-            OutArray[3] = (uint8_t)(OutTemp & 0xFF);
-            OutArray[4] = (uint8_t)(OutTemp >> 8);
-
-            
-        }
-        // Read Z axis
-        error = I2C_Peripheral_ReadRegisterMulti(LIS3DH_DEVICE_ADDRESS,
-                                            LIS3DH_OUT_Z_L,
-                                            2,
-                                            AccelerometerData);
-        if(error == NO_ERROR)
-        {
-            OutTemp = (int16)((AccelerometerData[1] | (AccelerometerData[0]<<8)))>>4;
-            OutTemp = OutTemp*LIS3DH_SENS_4G;
-            OutTemp = OutTemp*9.81;
-            OutArray[5] = (uint8_t)(OutTemp & 0xFF);
-            OutArray[6] = (uint8_t)(OutTemp >> 8);
-
-        }
-        
-        // Send all the measurements throught UART communication
-        UART_Debug_PutArray(OutArray, 8);
-
-        }
-        flag_start_reading=0; // Reset flag checking LIS3DH Status Register
-        Start_reading_flag=0; // Reset flag checking Timer Status Register
-        
-    }
+    /* In order to send data with 3 decimal values, data will be sent to UART communication 
+    in mm/s^2 and then adjusted with the Bridge Control Panel settings in order to plot m/s^2.
     */
     for(;;)
     {
@@ -407,12 +344,14 @@ int main(void)
         {
             //Check bit a bit with data read from the Status Register
             if ((Check_data&LIS3DH_STATUS_REG_NEW_VALUES)==LIS3DH_STATUS_REG_NEW_VALUES){
-                flag_start_reading =1;
+                CTRL_Reg_start =1;
             }
             
         }
         
-        if (flag_start_reading & Start_reading_flag){
+        
+        /*Start reading data if both flag from Status Register and Timer ISR are 1*/
+        if (CTRL_Reg_start & Timer_ISR_start){
         // Read X axis
         error = I2C_Peripheral_ReadRegisterMulti(LIS3DH_DEVICE_ADDRESS,
                                             LIS3DH_OUT_X_L,
@@ -420,20 +359,22 @@ int main(void)
                                             AccelerometerData);
         if(error == NO_ERROR)
         {
-            OutTemp   = (int16)((AccelerometerData[1] | (AccelerometerData[0]<<8)))>>4;
-            OutTemp = OutTemp*LIS3DH_SENS_4G;
-            OutTempHR_float = OutTemp*9.80665;
+            OutTemp   = (int16)((AccelerometerData[1] | (AccelerometerData[0]<<8)))>>4; // Shift 4 bit to right since High Resolution provide 12 bit resolution left adjusted
+            OutTemp = OutTemp*LIS3DH_SENS_4G; // Add conversion factor related to FSR of 4g
+            OutTempHR_float = OutTemp*G_TO_ACC; // Convert the Accelerometer Data from mg to mm/s^2
             OutTempHR_int = (int32) OutTempHR_float;
-            OutArrayHR[1] = (uint8_t)(OutTemp & 0xFF);
-            OutArrayHR[2] = (uint8_t)((OutTemp >> 8)&0xFF);
-            OutArrayHR[3] = (uint8_t)((OutTemp >> 16)&0xFF);
-            OutArrayHR[4] = (uint8_t)(OutTemp >> 24);
+            /*Save data in 4 int8 array to cover the int32 sensibility*/
+            OutArrayHR[1] = (uint8_t)(OutTempHR_int & 0xFF);
+            OutArrayHR[2] = (uint8_t)((OutTempHR_int >> 8)&0xFF);
+            OutArrayHR[3] = (uint8_t)((OutTempHR_int >> 16)&0xFF);
+            OutArrayHR[4] = (uint8_t)(OutTempHR_int >> 24);
 
             
             
             
         }
         // Read Y axis
+        // Repeat the same steps of the X axis
         error = I2C_Peripheral_ReadRegisterMulti(LIS3DH_DEVICE_ADDRESS,
                                             LIS3DH_OUT_Y_L,
                                             2,
@@ -442,16 +383,17 @@ int main(void)
         {
             OutTemp = (int16)((AccelerometerData[1] | (AccelerometerData[0]<<8)))>>4;
             OutTemp = OutTemp*LIS3DH_SENS_4G;
-            OutTempHR_float = (OutTemp)*9.80665;
+            OutTempHR_float = (OutTemp)*G_TO_ACC;
             OutTempHR_int = (int32) OutTempHR_float;
-            OutArrayHR[5] = (uint8_t)(OutTemp & 0xFF);
-            OutArrayHR[6] = (uint8_t)((OutTemp >> 8)&0xFF);
-            OutArrayHR[7] = (uint8_t)((OutTemp >> 16)&0xFF);
-            OutArrayHR[8] = (uint8_t)(OutTemp >> 24);
+            OutArrayHR[5] = (uint8_t)(OutTempHR_int & 0xFF);
+            OutArrayHR[6] = (uint8_t)((OutTempHR_int >> 8)&0xFF);
+            OutArrayHR[7] = (uint8_t)((OutTempHR_int >> 16)&0xFF);
+            OutArrayHR[8] = (uint8_t)(OutTempHR_int >> 24);
 
             
         }
         // Read Z axis
+        // Repeat the same steps of the Z axis
         error = I2C_Peripheral_ReadRegisterMulti(LIS3DH_DEVICE_ADDRESS,
                                             LIS3DH_OUT_Z_L,
                                             2,
@@ -460,12 +402,12 @@ int main(void)
         {
             OutTemp = (int16)((AccelerometerData[1] | (AccelerometerData[0]<<8)))>>4;
             OutTemp = OutTemp*LIS3DH_SENS_4G;
-            OutTempHR_float = OutTemp*9.80665;
+            OutTempHR_float = OutTemp*G_TO_ACC;
             OutTempHR_int = (int32) OutTempHR_float;
-            OutArrayHR[9] = (uint8_t)(OutTemp & 0xFF);
-            OutArrayHR[10] = (uint8_t)((OutTemp >> 8)&0xFF);
-            OutArrayHR[11] = (uint8_t)((OutTemp >> 16)&0xFF);
-            OutArrayHR[12] = (uint8_t)(OutTemp >> 24);
+            OutArrayHR[9] = (uint8_t)(OutTempHR_int & 0xFF);
+            OutArrayHR[10] = (uint8_t)((OutTempHR_int >> 8)&0xFF);
+            OutArrayHR[11] = (uint8_t)((OutTempHR_int >> 16)&0xFF);
+            OutArrayHR[12] = (uint8_t)(OutTempHR_int >> 24);
 
         }
         
@@ -473,8 +415,8 @@ int main(void)
         UART_Debug_PutArray(OutArrayHR, 14);
 
         }
-        flag_start_reading=0; // Reset flag checking LIS3DH Status Register
-        Start_reading_flag=0; // Reset flag checking Timer Status Register
+        CTRL_Reg_start=0; // Reset flag checking LIS3DH Status Register
+        Timer_ISR_start=0; // Reset flag related to Timer ISR
         
     }
 }
